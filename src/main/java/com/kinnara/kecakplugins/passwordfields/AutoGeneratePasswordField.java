@@ -180,6 +180,8 @@ public class AutoGeneratePasswordField extends PasswordField implements PluginWe
 
     @Override
     public void webService(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
+        LogUtil.info(getClass().getName(), "Executing JSON Rest API [" + httpServletRequest.getRequestURI() + "] in method [" + httpServletRequest.getMethod() + "] as [" + WorkflowUtil.getCurrentUsername() + "]");
+
         ApplicationContext applicationContext = AppUtil.getApplicationContext();
         PluginManager pluginManager = (PluginManager) applicationContext.getBean("pluginManager");
         WorkflowUserManager workflowUserManager = (WorkflowUserManager) applicationContext.getBean("workflowUserManager");
@@ -199,9 +201,15 @@ public class AutoGeneratePasswordField extends PasswordField implements PluginWe
             final String formId = getRequiredBodyPayload(requestBody, "formId");
             final String fieldId = getRequiredBodyPayload(requestBody, "fieldId");
             final String primaryKey = getRequiredBodyPayload(requestBody, "primaryKey");
-            final String username = getRequiredBodyPayload(requestBody, "username");
 
-            workflowUserManager.setCurrentThreadUser(username);
+            if(WorkflowUtil.isCurrentUserInRole(WorkflowUtil.ROLE_ADMIN)) {
+                String adminUser = WorkflowUtil.getCurrentUsername();
+                final String username = getOptionalBodyPayload(requestBody, "username", "");
+                if(!username.isEmpty()) {
+                    workflowUserManager.setCurrentThreadUser(username);
+                    LogUtil.info(getClassName(), "Admin user [" + adminUser + "] is logging in as [" + username + "]");
+                }
+            }
 
             String activityId = getOptionalBodyPayload(requestBody, "activityId", null);
             String processId = getOptionalBodyPayload(requestBody, "processId", null);
@@ -261,7 +269,7 @@ public class AutoGeneratePasswordField extends PasswordField implements PluginWe
                 }
 
                 if ("true".equalsIgnoreCase(elementForLoading.getPropertyString("debug"))) {
-                    LogUtil.info(getClassName(), "Sending password notification token [" + randomPassword + "]");
+                    LogUtil.info(getClassName(), "Sending password notification, new random password [" + randomPassword + "]");
                 }
 
                 notificationToolPlugin.execute(executionProperties);
