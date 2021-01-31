@@ -34,6 +34,10 @@ import java.util.stream.Collectors;
 /**
  * @author aristo
  *
+ * TODO: add additional features from leagacy OneTimePasswordField
+ * - encrypted data
+ * -
+ *
  */
 public class OneTimePasswordField extends Element implements FormBuilderPaletteElement, Utils, PluginWebSupport, AceFormElement, AdminLteFormElement {
 	private final static String BODY_FORM_ID = "FORM_ID";
