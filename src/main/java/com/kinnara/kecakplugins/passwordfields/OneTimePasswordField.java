@@ -84,7 +84,7 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
 	}
 
 	@Override
-	public String getElementValue(FormData formData) {
+	public Object handleElementValueResponse(@Nonnull Element element, @Nonnull FormData formData) throws JSONException {
 		AppDefinition appDefinition = AppUtil.getCurrentAppDefinition();
 		Form rootForm = FormUtil.findRootForm(this);
 		String primaryKeyValue = formData.getPrimaryKeyValue();
