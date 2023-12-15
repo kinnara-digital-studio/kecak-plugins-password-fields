@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
@@ -140,12 +141,15 @@ public class AutoGeneratePasswordField extends PasswordField implements PluginWe
 
     @Override
     public String getName() {
-        return getLabel() + getVersion();
+        return getLabel();
     }
 
     @Override
     public String getVersion() {
-        return getClass().getPackage().getImplementationVersion();
+        PluginManager pluginManager = (PluginManager) AppUtil.getApplicationContext().getBean("pluginManager");
+        ResourceBundle resourceBundle = pluginManager.getPluginMessageBundle(getClassName(), "/messages/BuildNumber");
+        String buildNumber = resourceBundle.getString("buildNumber");
+        return buildNumber;
     }
 
     @Override

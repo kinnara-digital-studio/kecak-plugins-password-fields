@@ -1,9 +1,12 @@
 package com.kinnara.kecakplugins.passwordfields;
 
 import com.kinnara.kecakplugins.passwordfields.commons.Utils;
+import org.joget.apps.app.service.AppUtil;
 import org.joget.plugin.base.DefaultApplicationPlugin;
+import org.joget.plugin.base.PluginManager;
 
 import java.util.Map;
+import java.util.ResourceBundle;
 
 public class OneTimePasswordGeneratorTool extends DefaultApplicationPlugin implements Utils {
     @Override
@@ -13,7 +16,10 @@ public class OneTimePasswordGeneratorTool extends DefaultApplicationPlugin imple
 
     @Override
     public String getVersion() {
-        return getClass().getPackage().getImplementationVersion();
+        PluginManager pluginManager = (PluginManager) AppUtil.getApplicationContext().getBean("pluginManager");
+        ResourceBundle resourceBundle = pluginManager.getPluginMessageBundle(getClassName(), "/messages/BuildNumber");
+        String buildNumber = resourceBundle.getString("buildNumber");
+        return buildNumber;
     }
 
     @Override
