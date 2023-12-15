@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * Auto generate password
  *
  */
-public class AutoGeneratePasswordField extends PasswordField implements PluginWebSupport, Utils, AceFormElement, AdminLteFormElement {
+public class AutoGeneratePasswordField extends PasswordField implements PluginWebSupport, Utils {
     private final static String BODY_FORM_ID = "FORM_ID";
     private final static String BODY_SECTION_ID = "SECTION_ID";
     private final static String BODY_FIELD_ID = "FIELD_ID";
@@ -67,16 +67,6 @@ public class AutoGeneratePasswordField extends PasswordField implements PluginWe
     @Override
     public String renderTemplate(FormData formData, Map map) {
         return renderTemplate("AutoGeneratePasswordField.ftl", formData, map);
-    }
-
-    @Override
-    public String renderAceTemplate(FormData formData, Map dataModel) {
-        return renderTemplate("AutoGeneratePasswordFieldAce.ftl", formData, dataModel);
-    }
-
-    @Override
-    public String renderAdminLteTemplate(FormData formData, Map dataModel) {
-        return renderTemplate("AutoGeneratePasswordFieldAdminLte.ftl", formData, dataModel);
     }
 
     protected String renderTemplate(String template, FormData formData, @SuppressWarnings("rawtypes") Map dataModel){
@@ -257,7 +247,7 @@ public class AutoGeneratePasswordField extends PasswordField implements PluginWe
                     .orElseThrow(() -> new RestApiException(HttpServletResponse.SC_NOT_FOUND, "Form [" + formId + "] field [" + fieldId + "] not found"));
 
             Map<String, Object> notificationToolProperty = (Map<String, Object>) elementToExecute.getProperty("notificationTool");
-            DefaultApplicationPlugin notificationToolPlugin = pluginManager.getPluginObject(notificationToolProperty);
+            DefaultApplicationPlugin notificationToolPlugin = pluginManager.getPlugin(notificationToolProperty);
 
             if(notificationToolPlugin != null) {
                 Map<String, Object> executionProperties = (Map<String, Object>) notificationToolProperty.get("properties");

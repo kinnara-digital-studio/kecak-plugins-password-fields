@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  * -
  *
  */
-public class OneTimePasswordField extends Element implements FormBuilderPaletteElement, Utils, PluginWebSupport, AceFormElement, AdminLteFormElement {
+public class OneTimePasswordField extends Element implements FormBuilderPaletteElement, Utils, PluginWebSupport {
 	private final static String BODY_FORM_ID = "FORM_ID";
 	private final static String BODY_SECTION_ID = "SECTION_ID";
 	private final static String BODY_FIELD_ID = "FIELD_ID";
@@ -70,19 +70,6 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
 		String template = "OneTimePassword.ftl";
 		return renderTemplate(template, formData, dataModel);
 	}
-
-	@Override
-	public String renderAdminLteTemplate(FormData formData, Map dataModel) {
-		String template = "OneTimePasswordAdminLte.ftl";
-		return renderTemplate(template, formData, dataModel);
-	}
-
-	@Override
-	public String renderAceTemplate(FormData formData, Map dataModel) {
-		String template = "OneTimePasswordAce.ftl";
-		return renderTemplate(template, formData, dataModel);
-	}
-
 	@Override
 	public Object handleElementValueResponse(@Nonnull Element element, @Nonnull FormData formData) throws JSONException {
 		AppDefinition appDefinition = AppUtil.getCurrentAppDefinition();
@@ -306,7 +293,7 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
 			Form formToExecute = generateForm(formId, formData);
 			Element elementToExecute = FormUtil.findElement(fieldId, formToExecute, formData);
             Map<String, Object> notificationToolProperty = (Map<String, Object>) elementToExecute.getProperty("notificationTool");
-            DefaultApplicationPlugin notificationToolPlugin = pluginManager.getPluginObject(notificationToolProperty);
+            DefaultApplicationPlugin notificationToolPlugin = pluginManager.getPlugin(notificationToolProperty);
 
             if(notificationToolPlugin != null) {
 				Map<String, Object> executionProperties = (Map<String, Object>) notificationToolProperty.get("properties");
