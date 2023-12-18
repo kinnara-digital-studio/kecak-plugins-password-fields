@@ -25,11 +25,11 @@ public class OneTimePasswordValidator extends FormValidator {
     }
 
     @Override
-    public boolean validate(Element element, FormData formData, String[] strings) {
+    public boolean validate(Element element, FormData formData, String[] values) {
         String elementId = element.getPropertyString("id");
         String elementLabel = element.getPropertyString("label");
 
-        return validateMandatory(formData, elementId, elementLabel, strings, null) && validateToken(element, formData, strings);
+        return validateMandatory(formData, elementId, elementLabel, values, null) && validateToken(element, formData, values);
     }
 
     @Override

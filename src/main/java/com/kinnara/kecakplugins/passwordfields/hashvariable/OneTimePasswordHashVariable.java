@@ -10,6 +10,9 @@ import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+/**
+ * Hash variable to show one-time password value in notification plugin
+ */
 public class OneTimePasswordHashVariable extends DefaultHashVariablePlugin {
     public final static String LABEL = "One Time Password Hash Variable";
 
@@ -18,10 +21,16 @@ public class OneTimePasswordHashVariable extends DefaultHashVariablePlugin {
         return "oneTimePassword";
     }
 
+    /**
+     * Hash variable will not be processed as plugin
+     *
+     * @param key
+     * @return
+     */
     @Override
     public String processHashVariable(String key) {
-        LogUtil.info(getClassName(), "processHashVariable : key [" + key + "]");
-        return key;
+        // value is not used
+        return "";
     }
 
     @Override
@@ -61,7 +70,6 @@ public class OneTimePasswordHashVariable extends DefaultHashVariablePlugin {
     public Collection<String> availableSyntax() {
         final Set<String> syntax = new HashSet<>();
         syntax.add(this.getPrefix());
-        syntax.add(this.getPrefix() + ".CURRENT_FORM.CURRENT_FIELD");
         return syntax;
     }
 }

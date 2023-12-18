@@ -59,10 +59,8 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
 
     @Override
     public FormRowSet formatData(FormData formData) {
-        if (!"true".equalsIgnoreCase(getPropertyString("keepTokenInDatabase"))) {
-            // clear otp
-            formData.getRequestParams().put(FormUtil.getElementParameterName(this), new String[]{""});
-        }
+        // clear otp
+        formData.getRequestParams().put(FormUtil.getElementParameterName(this), new String[]{""});
 
         // save data
         return super.formatData(formData);
@@ -86,34 +84,6 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
                         getPropertyString(FormUtil.PROPERTY_ID),
                         primaryKeyValue),
                 1);
-    }
-
-    private void storeInitialValue(@Nonnull final Form form, @Nonnull final Element element, final FormData formData) {
-        // TODO : currently not working with mobile / API
-
-        Optional.ofNullable(formData)
-
-                // value has to be empty
-                .filter(fd -> FormUtil.getElementPropertyValue(element, formData).isEmpty())
-
-                // primary key is not empty
-                .map(FormData::getPrimaryKeyValue)
-                .filter(s -> !s.isEmpty())
-
-
-                .ifPresent(primaryKey -> {
-                    String parameterName = FormUtil.getElementParameterName(element);
-
-                    ApplicationContext applicationContext = AppUtil.getApplicationContext();
-                    FormService formService = (FormService) applicationContext.getBean("formService");
-
-                    FormData storeFormData = new FormData();
-                    storeFormData.setPrimaryKeyValue(primaryKey);
-                    storeFormData.addRequestParameterValues(FormUtil.PROPERTY_ID, new String[]{primaryKey});
-                    storeFormData.addRequestParameterValues(parameterName, new String[]{""});
-
-                    formService.executeFormStoreBinders(form, storeFormData);
-                });
     }
 
     protected String renderTemplate(String template, FormData formData, @SuppressWarnings("rawtypes") Map dataModel) {
@@ -140,8 +110,6 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
         Form rootForm = FormUtil.findRootForm(this);
         if (rootForm != null) {
             dataModel.put(BODY_FORM_ID, rootForm.getPropertyString(FormUtil.PROPERTY_ID));
-
-//			storeInitialValue(rootForm, this, formData);
 
             Section section = this.getElementSection(this);
             if (section != null) {
@@ -297,7 +265,8 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
 
             // generate and load token
             final String oneTimePassword = Optional.of(element)
-                    .map(Element::getLoadBinder)
+                    .map(e -> e.getProperty("generatorLoadBinder"))
+                    .map(prop -> (FormLoadBinder) pluginManager.getPlugin((Map<String, Object>)prop))
                     .map(binder -> binder.load(element, primaryKey, formData))
                     .map(Collection::stream)
                     .orElseGet(Stream::empty)
@@ -308,6 +277,10 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
                         LogUtil.warn(getClass().getName(), "Error form [" + formId + "] field [" + fieldId + "] message [" + message + "]");
                         return new RestApiException(HttpServletResponse.SC_BAD_REQUEST, message);
                     });
+
+            if(element.isDebug()) {
+                LogUtil.info(getClassName(), "Token generated [" + oneTimePassword + "]");
+            }
 
             final Form formToExecute = generateForm(formId, formData);
             final Element elementToExecute = FormUtil.findElement(fieldId, formToExecute, formData);
@@ -383,34 +356,6 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
         return strings;
     }
 
-    /**
-     * Determine number of digits for token, default = 4
-     *
-     * @param element
-     * @return
-     */
-    private int getTokenDigits(Element element) {
-        return Optional.ofNullable(element.getPropertyString("digitsToken"))
-                .filter(s -> s.matches("[0-9]+"))
-                .map(Integer::parseInt)
-                .orElse(4);
-    }
-
-    protected String getBinderValue(FormData formData) {
-        String id = getPropertyString(FormUtil.PROPERTY_ID);
-        String value = getPropertyString(FormUtil.PROPERTY_VALUE);
-
-        // load from binder if available
-        if (formData != null) {
-            String binderValue = formData.getLoadBinderDataProperty(this, id);
-            if (binderValue != null) {
-                value = binderValue;
-            }
-        }
-
-        return value;
-    }
-
     protected boolean ignoreNonce() {
         return "true".equalsIgnoreCase(getPropertyString("ignoreNonce"));
     }
@@ -427,5 +372,9 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
         } else {
             return value;
         }
+    }
+
+    protected boolean isDebug() {
+        return "true".equalsIgnoreCase(getPropertyString("debug"));
     }
 }

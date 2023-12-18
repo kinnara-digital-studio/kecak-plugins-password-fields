@@ -49,7 +49,7 @@ public class OneTimePasswordLoadBinder extends FormBinder implements FormLoadBin
 
     @Override
     public String getPropertyOptions() {
-        return AppUtil.readPluginResource(getClass().getName(), "/properties/OneTimaPasswordLoadBinder.json");
+        return AppUtil.readPluginResource(getClass().getName(), "/properties/OneTimaPasswordLoadBinder.json", null, true, "/messages/OneTimePassword");
     }
 
 
@@ -78,7 +78,6 @@ public class OneTimePasswordLoadBinder extends FormBinder implements FormLoadBin
 
         final int digits = getDigits();
         final String tokenValue = generateRandomToken(digits);
-        LogUtil.info(getClassName(), "Token generated [" + tokenValue + "]");
 
         final FormRowSet rowSet = new FormRowSet();
         final FormRow row = new FormRow();
