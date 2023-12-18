@@ -1,4 +1,4 @@
-package com.kinnara.kecakplugins.passwordfields;
+package com.kinnara.kecakplugins.passwordfields.tool;
 
 import com.kinnara.kecakplugins.passwordfields.commons.Utils;
 import org.joget.apps.app.service.AppUtil;

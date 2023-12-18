@@ -37,7 +37,7 @@
             };
 
             $.ajax({
-                url: "${request.contextPath}/web/json/app/${appId!}/${appVersion!}/plugin/${className}/service?${requestParameter}",
+                url: "${request.contextPath}/web/json/app/${appId!}/${appVersion!}/plugin/${className}/service",
                 type : 'POST',
                 dataType: 'json',
                 headers : { 'Content-Type' : 'application/json' },

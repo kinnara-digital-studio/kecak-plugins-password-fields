@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
 import java.util.Optional;
@@ -66,7 +67,7 @@ public interface Utils {
         return formDataDao.load(form, primaryKey);
     }
 
-    default WorkflowAssignment getAssignment(String activityId, String processId, String primaryKey) {
+    default WorkflowAssignment getAssignment(String activityId, String processId, @Nullable String primaryKey) {
         ApplicationContext applicationContext = AppUtil.getApplicationContext();
         WorkflowManager workflowManager = (WorkflowManager) applicationContext.getBean("workflowManager");
         WorkflowProcessLinkDao workflowProcessLinkDao = (WorkflowProcessLinkDao) applicationContext.getBean("workflowProcessLinkDao");

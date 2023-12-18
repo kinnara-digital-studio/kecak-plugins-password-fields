@@ -1,4 +1,4 @@
-package com.kinnara.kecakplugins.passwordfields;
+package com.kinnara.kecakplugins.passwordfields.form.element;
 
 import com.kinnara.kecakplugins.passwordfields.commons.RestApiException;
 import com.kinnara.kecakplugins.passwordfields.commons.Utils;
