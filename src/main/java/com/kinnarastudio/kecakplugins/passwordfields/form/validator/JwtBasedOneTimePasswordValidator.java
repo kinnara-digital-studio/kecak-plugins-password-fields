@@ -47,7 +47,7 @@ public class JwtBasedOneTimePasswordValidator extends FormValidator {
                     if(buttonLabel.isEmpty()) {
                         errorMessage = "Token expired";
                     } else {
-                        errorMessage = "Token expired. Please re-click button \"" + buttonLabel + "\"";
+                        errorMessage = "Token expired. Please re-press button \"" + buttonLabel + "\"";
                     }
 
                     formData.addFormError(elementId, errorMessage);
@@ -128,7 +128,7 @@ public class JwtBasedOneTimePasswordValidator extends FormValidator {
             if(buttonLabel.isEmpty()) {
                 errorMessage = "Invalid token";
             } else {
-                errorMessage = "Invalid token, please re-click button \"" + buttonLabel + "\"";
+                errorMessage = "Invalid token, please re-press button \"" + buttonLabel + "\"";
             }
 
             formData.addFormError(elementId, errorMessage);
