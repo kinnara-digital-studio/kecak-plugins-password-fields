@@ -44,6 +44,8 @@
                 data : JSON.stringify(jsonData),
             })
             .always(function(data) {
+                debugger;
+
                 $("#${elementId!}-loading").hide();
                 $("#${elementId!}").val("");
                 $("#${elementId!}").parent().find("label").find("span.form-error-message").remove();

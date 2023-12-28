@@ -2,7 +2,6 @@ package com.kinnarastudio.kecakplugins.passwordfields.form.validator;
 
 import com.kinnarastudio.commons.Try;
 import com.kinnarastudio.kecakplugins.passwordfields.form.binder.JwtBasedOneTimePasswordLoadBinder;
-import io.jsonwebtoken.ExpiredJwtException;
 import org.joget.apps.app.service.AppUtil;
 import org.joget.apps.form.model.Element;
 import org.joget.apps.form.model.FormData;
