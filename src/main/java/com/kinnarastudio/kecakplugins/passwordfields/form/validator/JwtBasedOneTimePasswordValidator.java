@@ -43,7 +43,16 @@ public class JwtBasedOneTimePasswordValidator extends FormValidator {
                 .filter(e -> e.getKey().startsWith(JwtBasedOneTimePasswordLoadBinder.JWT_KEY + "-"))
                 .map(Map.Entry::getValue)
                 .map(Try.onFunction( token -> authTokenService.getClaimDataFromToken(token, JwtBasedOneTimePasswordLoadBinder.PASSWORD_KEY, String.class), (RuntimeException e) -> {
-                    formData.addFormError(elementId, "Token expired");
+                    final String buttonLabel = element.getPropertyString("generateTokenButtonLabel");
+                    final String errorMessage;
+                    if(buttonLabel.isEmpty()) {
+                        errorMessage = "Token expired";
+                    } else {
+                        errorMessage = "Token expired. Please re-click button \"" + buttonLabel + "\"";
+                    }
+
+                    formData.addFormError(elementId, errorMessage);
+
                     return null;
                 }))
                 .filter(Objects::nonNull)
@@ -114,7 +123,17 @@ public class JwtBasedOneTimePasswordValidator extends FormValidator {
         boolean isValid = Arrays.stream(values).anyMatch(Arrays.asList(storedPasswords)::contains);
 
         if (!isValid) {
-            formData.addFormError(elementId, "Invalid token");
+            final String buttonLabel = element.getPropertyString("generateTokenButtonLabel");
+
+            final String errorMessage;
+            if(buttonLabel.isEmpty()) {
+                errorMessage = "Invalid token";
+            } else {
+                errorMessage = "Invalid token, please re-click button \"" + buttonLabel + "\"";
+            }
+
+            formData.addFormError(elementId, errorMessage);
+
             return false;
         }
 
