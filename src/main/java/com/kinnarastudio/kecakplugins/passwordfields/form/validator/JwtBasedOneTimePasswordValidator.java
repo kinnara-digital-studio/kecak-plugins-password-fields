@@ -42,7 +42,7 @@ public class JwtBasedOneTimePasswordValidator extends FormValidator {
         final String[] onetimePasswords = ((Map<String, String>)getRow(element, formData).getCustomProperties()).entrySet().stream()
                 .filter(e -> e.getKey().startsWith(JwtBasedOneTimePasswordLoadBinder.JWT_KEY + "-"))
                 .map(Map.Entry::getValue)
-                .map(Try.onFunction( token -> authTokenService.getClaimDataFromToken(token, JwtBasedOneTimePasswordLoadBinder.PASSWORD_KEY, String.class), (ExpiredJwtException e) -> {
+                .map(Try.onFunction( token -> authTokenService.getClaimDataFromToken(token, JwtBasedOneTimePasswordLoadBinder.PASSWORD_KEY, String.class), (RuntimeException e) -> {
                     formData.addFormError(elementId, "Token expired");
                     return null;
                 }))
