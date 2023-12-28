@@ -1,22 +1,22 @@
-package com.kinnara.kecakplugins.passwordfields.form.binder;
+package com.kinnarastudio.kecakplugins.passwordfields.form.binder;
 
-import com.kinnara.kecakplugins.passwordfields.form.element.OneTimePasswordField;
+import com.kinnarastudio.kecakplugins.passwordfields.commons.Utils;
+import com.kinnarastudio.kecakplugins.passwordfields.form.element.OneTimePasswordField;
+import com.kinnarastudio.kecakplugins.passwordfields.form.validator.OneTimePasswordValidator;
 import org.joget.apps.app.service.AppUtil;
-import org.joget.apps.form.dao.FormDataDao;
 import org.joget.apps.form.model.*;
 import org.joget.apps.form.service.FormUtil;
 import org.joget.commons.util.LogUtil;
 import org.joget.plugin.base.PluginManager;
-import org.springframework.context.ApplicationContext;
 
 import java.util.Optional;
 import java.util.Random;
 import java.util.ResourceBundle;
 
 /**
- * Binder to generate one time password value. Later will be validated by {@link com.kinnara.kecakplugins.passwordfields.form.validator.OneTimePasswordValidator}
+ * Binder to generate one time password value. Later will be validated by {@link OneTimePasswordValidator}
  */
-public class OneTimePasswordLoadBinder extends FormBinder implements FormLoadBinder {
+public class OneTimePasswordLoadBinder extends FormBinder implements FormLoadBinder, Utils {
     public final static String LABEL = "One Time Password Binder";
 
     @Override
@@ -49,46 +49,32 @@ public class OneTimePasswordLoadBinder extends FormBinder implements FormLoadBin
 
     @Override
     public String getPropertyOptions() {
-        return AppUtil.readPluginResource(getClass().getName(), "/properties/OneTimaPasswordLoadBinder.json", null, true, "/messages/OneTimePassword");
+        final String[] args = new String[] { getLabel() };
+        return AppUtil.readPluginResource(getClass().getName(), "/properties/OneTimaPasswordLoadBinder.json", args, true, "/messages/OneTimePassword");
     }
 
 
-    protected String generateRandomToken(int digits) {
+    protected String generateRandomPassword(int digits) {
         Random rand = new Random();
         return String.format("%0" + digits + "d", rand.nextInt((int) Math.pow(10, digits)));
     }
 
     @Override
     public FormRowSet load(Element element, String primaryKey, FormData formData) {
-        LogUtil.info(getClass().getName(), "load : primaryKey [" + primaryKey + "]");
+        if(primaryKey == null) {
+            LogUtil.warn(getClass().getName(), "Primary key is not NULL");
+            return null;
+        }
 
-        final String fieldId = element.getPropertyString(FormUtil.PROPERTY_ID);
         if (!(element instanceof OneTimePasswordField)) {
+            final String fieldId = element.getPropertyString(FormUtil.PROPERTY_ID);
             LogUtil.warn(getClass().getName(), "Element [" + fieldId + "] is not [" + OneTimePasswordField.class.getSimpleName() + "]");
             return null;
         }
 
-        if(primaryKey == null) {
-            LogUtil.warn(getClass().getName(), "Primary key is not provided");
-            return null;
-        }
-
-        ApplicationContext applicationContext = AppUtil.getApplicationContext();
-        FormDataDao formDataDao = (FormDataDao) applicationContext.getBean("formDataDao");
-
         final int digits = getDigits();
-        final String tokenValue = generateRandomToken(digits);
-
-        final FormRowSet rowSet = new FormRowSet();
-        final FormRow row = new FormRow();
-        row.setId(primaryKey);
-        row.setProperty(fieldId, tokenValue);
-        rowSet.add(row);
-
-        final Form form = FormUtil.findRootForm(element);
-        formDataDao.saveOrUpdate(form, rowSet);
-
-        return rowSet;
+        final String otpValue = generateRandomPassword(digits);
+        return storeToken(element, primaryKey, otpValue);
     }
 
     protected int getDigits() {

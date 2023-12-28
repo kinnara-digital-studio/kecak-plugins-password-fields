@@ -1,8 +1,7 @@
-package com.kinnara.kecakplugins.passwordfields.hashvariable;
+package com.kinnarastudio.kecakplugins.passwordfields.hashvariable;
 
 import org.joget.apps.app.model.DefaultHashVariablePlugin;
 import org.joget.apps.app.service.AppUtil;
-import org.joget.commons.util.LogUtil;
 import org.joget.plugin.base.PluginManager;
 
 import java.util.Collection;
@@ -29,8 +28,7 @@ public class OneTimePasswordHashVariable extends DefaultHashVariablePlugin {
      */
     @Override
     public String processHashVariable(String key) {
-        // value is not used
-        return "";
+        return key;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package com.kinnara.kecakplugins.passwordfields.commons;
+package com.kinnarastudio.kecakplugins.passwordfields.commons;
 
 public class RestApiException extends Exception {
     private String message;

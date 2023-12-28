@@ -1,7 +1,7 @@
-package com.kinnara.kecakplugins.passwordfields.form.element;
+package com.kinnarastudio.kecakplugins.passwordfields.form.element;
 
-import com.kinnara.kecakplugins.passwordfields.commons.RestApiException;
-import com.kinnara.kecakplugins.passwordfields.commons.Utils;
+import com.kinnarastudio.kecakplugins.passwordfields.commons.RestApiException;
+import com.kinnarastudio.kecakplugins.passwordfields.commons.Utils;
 import org.joget.apps.app.model.AppDefinition;
 import org.joget.apps.app.service.AppPluginUtil;
 import org.joget.apps.app.service.AppUtil;

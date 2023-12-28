@@ -48,6 +48,27 @@
                 $("#${elementId!}").val("");
                 $("#${elementId!}").parent().find("label").find("span.form-error-message").remove();
                 $("#${elementId!}").parent().find("label").append('<span class="form-error-message">'+data.message+'</span>');
+
+                let row = data.row;
+                let $formCell = $("#${elementId!}").parents('div.form-cell');
+                for(let key in row) {
+                    let id = '${elementId!}-' + key;
+                    let $e = $formCell.find('#' + id);
+                    let value = row[key];
+                    if($e.length > 0) {
+                        $e.val(value);
+                    } else {
+                        let name = '${elementParamName!}-' + key;
+                        $input = $('<input>').attr({
+                             type: 'hidden',
+                             id: id,
+                             name: name,
+                             value : value
+                        });
+
+                        $formCell.append($input);
+                    }
+                }
             })
             .fail(function(data) {
                 let response = JSON.parse(data.responseText);

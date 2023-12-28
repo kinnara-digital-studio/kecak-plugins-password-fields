@@ -1,4 +1,4 @@
-package com.kinnara.kecakplugins.passwordfields.commons;
+package com.kinnarastudio.kecakplugins.passwordfields.commons;
 
 import org.joget.apps.app.dao.AppDefinitionDao;
 import org.joget.apps.app.dao.FormDefinitionDao;
@@ -9,6 +9,7 @@ import org.joget.apps.app.service.AppUtil;
 import org.joget.apps.form.dao.FormDataDao;
 import org.joget.apps.form.model.*;
 import org.joget.apps.form.service.FormService;
+import org.joget.apps.form.service.FormUtil;
 import org.joget.commons.util.SecurityUtil;
 import org.joget.workflow.model.WorkflowAssignment;
 import org.joget.workflow.model.WorkflowProcessLink;
@@ -53,6 +54,7 @@ public interface Utils {
                 .filter(s -> !s.isEmpty())
                 .orElse(defaultValue);
     }
+
 
     default FormRow storePassword(Form form, String primaryKey, String field, String tokenValue) {
         ApplicationContext applicationContext = AppUtil.getApplicationContext();
@@ -123,7 +125,13 @@ public interface Utils {
         return stream;
     }
 
-    default void storeToken(Form form, String primaryKey, String field, String tokenValue) {
+    default FormRowSet storeToken(Element element, String primaryKey, String value) {
+        final Form form = FormUtil.findRootForm(element);
+        final String fieldId = element.getPropertyString(FormUtil.PROPERTY_ID);
+        return storeToken(form,  primaryKey, fieldId, value);
+    }
+
+    default FormRowSet storeToken(Form form, String primaryKey, String field, String tokenValue) {
         ApplicationContext applicationContext = AppUtil.getApplicationContext();
         FormDataDao formDataDao = (FormDataDao) applicationContext.getBean("formDataDao");
 
@@ -133,5 +141,7 @@ public interface Utils {
         row.setProperty(field, tokenValue);
         rowSet.add(row);
         formDataDao.saveOrUpdate(form, rowSet);
+
+        return rowSet;
     }
 }
