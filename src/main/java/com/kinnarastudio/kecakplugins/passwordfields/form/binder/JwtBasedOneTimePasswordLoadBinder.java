@@ -16,8 +16,8 @@ import java.util.*;
  * Binder to generate one time password value. Later will be validated by {@link OneTimePasswordValidator}
  */
 public class JwtBasedOneTimePasswordLoadBinder extends FormBinder implements FormLoadBinder {
+    public final static String LABEL = "JWT One-Time Password Binder";
     public final static String JWT_KEY = "token";
-    public final static String LABEL = "JWT One Time Password Binder";
     public final static String PASSWORD_KEY = "otp";
 
     @Override

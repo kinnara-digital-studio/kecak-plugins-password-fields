@@ -17,7 +17,7 @@ import java.util.ResourceBundle;
  * Binder to generate one time password value. Later will be validated by {@link OneTimePasswordValidator}
  */
 public class OneTimePasswordLoadBinder extends FormBinder implements FormLoadBinder, Utils {
-    public final static String LABEL = "One Time Password Binder";
+    public final static String LABEL = "One-Time Password Binder";
 
     @Override
     public String getName() {

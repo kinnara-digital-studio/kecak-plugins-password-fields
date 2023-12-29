@@ -43,6 +43,7 @@ import java.util.stream.Stream;
  * -
  */
 public class OneTimePasswordField extends Element implements FormBuilderPaletteElement, Utils, PluginWebSupport {
+    public final static String LABEL = "One-Time Password";
     private final static String BODY_FORM_ID = "FORM_ID";
     private final static String BODY_SECTION_ID = "SECTION_ID";
     private final static String BODY_FIELD_ID = "FIELD_ID";
@@ -166,7 +167,7 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
 
     @Override
     public String getName() {
-        return getLabel();
+        return LABEL;
     }
 
     @Override
@@ -184,7 +185,7 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
 
     @Override
     public String getLabel() {
-        return "One-Time Password";
+        return LABEL;
     }
 
     @Override
