@@ -2,8 +2,8 @@ package com.kinnarastudio.kecakplugins.passwordfields.form.element;
 
 import com.kinnarastudio.kecakplugins.passwordfields.commons.RestApiException;
 import com.kinnarastudio.kecakplugins.passwordfields.commons.Utils;
-import com.kinnarastudio.kecakplugins.passwordfields.form.binder.JwtBasedOneTimePasswordLoadBinder;
-import com.kinnarastudio.kecakplugins.passwordfields.form.validator.JwtBasedOneTimePasswordValidator;
+import com.kinnarastudio.kecakplugins.passwordfields.form.binder.OneTimePasswordLoadBinder;
+import com.kinnarastudio.kecakplugins.passwordfields.form.validator.OneTimePasswordValidator;
 import com.kinnarastudio.kecakplugins.passwordfields.hashvariable.OneTimePasswordHashVariable;
 import org.joget.apps.app.model.AppDefinition;
 import org.joget.apps.app.service.AppPluginUtil;
@@ -196,8 +196,8 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
     @Override
     public String getPropertyOptions() {
         final String[] args = new String[]{
-                JwtBasedOneTimePasswordLoadBinder.class.getName(),
-                JwtBasedOneTimePasswordValidator.class.getName()
+                OneTimePasswordLoadBinder.class.getName(),
+                OneTimePasswordValidator.class.getName()
         };
 
         return AppUtil.readPluginResource(getClassName(), "/properties/OneTimePasswordField.json", args, true, "/messages/OneTimePassword");
