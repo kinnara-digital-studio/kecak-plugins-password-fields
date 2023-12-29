@@ -378,7 +378,7 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
 
     protected Object deepReplaceOtp(Object value, String find, String replaceWith) {
         if (value instanceof String) {
-            return ((String) value).replaceAll(find, replaceWith);
+            return value.toString().replaceAll(find, replaceWith);
         } else if (value instanceof Map) {
             return Optional.of((Map<String, Object>) value)
                     .map(Map::entrySet)

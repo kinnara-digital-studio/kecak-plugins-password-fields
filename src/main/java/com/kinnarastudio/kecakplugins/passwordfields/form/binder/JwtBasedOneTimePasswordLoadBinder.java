@@ -70,6 +70,7 @@ public class JwtBasedOneTimePasswordLoadBinder extends FormBinder implements For
         final boolean specialChars = hasSpecialCharacters();
         final String password = generateRandomPassword(digits, numeric, upperCase, lowerCase, specialChars);
 
+        LogUtil.info(getClassName(), "password ["+password+"]");
         AuthTokenService authTokenService = (AuthTokenService) AppUtil.getApplicationContext().getBean("authTokenService");
 
         String username = WorkflowUtil.getCurrentUsername();

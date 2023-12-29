@@ -67,8 +67,12 @@ public class OneTimePasswordLoadBinder extends FormBinder implements FormLoadBin
         }
 
         final int digits = getDigits();
-        final String otpValue = generateRandomPassword(digits, true,  false, false, false);
-        return storeToken(element, primaryKey, otpValue);
+        final boolean numeric = hasNumeric();
+        final boolean upperCase =hasUpperCase();
+        final boolean lowerCase = hasLowerCase();
+        final boolean specialChars = hasSpecialCharacters();
+        final String password = generateRandomPassword(digits, numeric, upperCase, lowerCase, specialChars);
+        return storeToken(element, primaryKey, password);
     }
 
     protected int getDigits() {
@@ -76,5 +80,22 @@ public class OneTimePasswordLoadBinder extends FormBinder implements FormLoadBin
                 .filter(s -> s.matches("[0-9]+"))
                 .map(Integer::parseInt)
                 .orElse(4);
+    }
+
+
+    protected boolean hasNumeric() {
+        return "true".equalsIgnoreCase(getPropertyString("numeric"));
+    }
+
+    protected boolean hasUpperCase() {
+        return "true".equalsIgnoreCase(getPropertyString("upper"));
+    }
+
+    protected boolean hasLowerCase() {
+        return "true".equalsIgnoreCase(getPropertyString("lower"));
+    }
+
+    protected boolean hasSpecialCharacters() {
+        return "true".equalsIgnoreCase(getPropertyString("special"));
     }
 }

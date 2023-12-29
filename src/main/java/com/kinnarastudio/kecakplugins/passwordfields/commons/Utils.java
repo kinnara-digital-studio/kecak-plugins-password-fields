@@ -20,12 +20,18 @@ import org.springframework.context.ApplicationContext;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Stream;
 
 public interface Utils {
+    Character[] DIC_NUMERIC = new Character[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+    Character[] DIC_UPPER = new Character[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+    Character[] DIC_LOWER = new Character[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+    Character[] DIC_SPECIAL = new Character[] { '!', '@', '#', '%', '^', '&', '*', '-', '+' };
+
     @Nonnull
     default Form generateForm(final String formDefId, final FormData formData) throws RestApiException {
         AppDefinition appDefinition = AppUtil.getCurrentAppDefinition();
@@ -129,6 +135,25 @@ public interface Utils {
 
     default String generateRandomPassword(int digits, boolean numeric, boolean upperCase, boolean lowerCase, boolean specialCharacter) {
         Random rand = new Random();
-        return String.format("%0"+digits+"d", rand.nextInt((int) Math.pow(10, digits)));
+
+        if(numeric && !upperCase && !lowerCase && !specialCharacter) {
+            return String.format("%0" + digits + "d", rand.nextInt((int) Math.pow(10, digits)));
+        }
+
+        Character[] dictionary = Stream.of(Arrays.stream(DIC_NUMERIC).filter(c -> numeric), Arrays.stream(DIC_UPPER).filter(c -> upperCase), Arrays.stream(DIC_LOWER).filter(c -> lowerCase),Arrays.stream(DIC_SPECIAL).filter(c -> specialCharacter))
+                .flatMap(stream -> stream)
+                .toArray(Character[]::new);
+
+        final StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < digits; i++) {
+            sb.append(generateRandomCharacter(dictionary, rand));
+        }
+        return sb.toString();
+    }
+
+    default Character generateRandomCharacter(final Character[] dictionary, final Random rand) {
+        final int len = dictionary.length;
+        final int index = rand.nextInt(len);
+        return dictionary[index];
     }
 }
