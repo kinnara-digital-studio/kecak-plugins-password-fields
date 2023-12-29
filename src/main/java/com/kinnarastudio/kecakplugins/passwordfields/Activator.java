@@ -1,18 +1,17 @@
 package com.kinnarastudio.kecakplugins.passwordfields;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import com.kinnarastudio.kecakplugins.passwordfields.form.binder.OneTimePasswordLoadBinder;
 import com.kinnarastudio.kecakplugins.passwordfields.form.binder.JwtBasedOneTimePasswordLoadBinder;
-import com.kinnarastudio.kecakplugins.passwordfields.form.element.AutoGeneratePasswordField;
+import com.kinnarastudio.kecakplugins.passwordfields.form.binder.OneTimePasswordLoadBinder;
 import com.kinnarastudio.kecakplugins.passwordfields.form.element.OneTimePasswordField;
-import com.kinnarastudio.kecakplugins.passwordfields.form.validator.OneTimePasswordValidator;
 import com.kinnarastudio.kecakplugins.passwordfields.form.validator.JwtBasedOneTimePasswordValidator;
+import com.kinnarastudio.kecakplugins.passwordfields.form.validator.OneTimePasswordValidator;
 import com.kinnarastudio.kecakplugins.passwordfields.hashvariable.OneTimePasswordHashVariable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class Activator implements BundleActivator {
 

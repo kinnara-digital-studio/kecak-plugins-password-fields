@@ -1,6 +1,5 @@
 package com.kinnarastudio.kecakplugins.passwordfields.commons;
 
-import org.joget.apps.app.dao.AppDefinitionDao;
 import org.joget.apps.app.dao.FormDefinitionDao;
 import org.joget.apps.app.model.AppDefinition;
 import org.joget.apps.app.model.FormDefinition;
@@ -23,6 +22,7 @@ import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Stream;
 
 public interface Utils {
@@ -88,11 +88,6 @@ public interface Utils {
                                 .orElse(null)));
     }
 
-    default Form generateForm(String appId, String appVersion, String formDefId) {
-        AppDefinitionDao appDefinitionDao = (AppDefinitionDao) AppUtil.getApplicationContext().getBean("appDefinitionDao");
-        return generateForm(appDefinitionDao.loadVersion(appId, Long.valueOf(appVersion)), formDefId);
-    }
-
     default Form generateForm(AppDefinition appDef, String formDefId) {
         // proceed without cache
         ApplicationContext appContext = AppUtil.getApplicationContext();
@@ -110,19 +105,6 @@ public interface Utils {
             }
         }
         return null;
-    }
-
-    @Nonnull
-    default Stream<Element> elementStream(@Nonnull Element element, FormData formData) {
-        if (!element.isAuthorize(formData)) {
-            return Stream.empty();
-        }
-
-        Stream<Element> stream = Stream.of(element);
-        for (Element child : element.getChildren()) {
-            stream = Stream.concat(stream, elementStream(child, formData));
-        }
-        return stream;
     }
 
     default FormRowSet storeToken(Element element, String primaryKey, String value) {
@@ -143,5 +125,10 @@ public interface Utils {
         formDataDao.saveOrUpdate(form, rowSet);
 
         return rowSet;
+    }
+
+    default String generateRandomPassword(int digits, boolean numeric, boolean upperCase, boolean lowerCase, boolean specialCharacter) {
+        Random rand = new Random();
+        return String.format("%0"+digits+"d", rand.nextInt((int) Math.pow(10, digits)));
     }
 }

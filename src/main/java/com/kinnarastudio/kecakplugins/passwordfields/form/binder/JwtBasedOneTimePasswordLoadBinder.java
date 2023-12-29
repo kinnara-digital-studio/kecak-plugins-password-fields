@@ -1,5 +1,6 @@
 package com.kinnarastudio.kecakplugins.passwordfields.form.binder;
 
+import com.kinnarastudio.kecakplugins.passwordfields.commons.Utils;
 import com.kinnarastudio.kecakplugins.passwordfields.form.element.OneTimePasswordField;
 import com.kinnarastudio.kecakplugins.passwordfields.form.validator.OneTimePasswordValidator;
 import org.joget.apps.app.service.AppUtil;
@@ -15,7 +16,7 @@ import java.util.*;
 /**
  * Binder to generate one time password value. Later will be validated by {@link OneTimePasswordValidator}
  */
-public class JwtBasedOneTimePasswordLoadBinder extends FormBinder implements FormLoadBinder {
+public class JwtBasedOneTimePasswordLoadBinder extends FormBinder implements FormLoadBinder, Utils {
     public final static String LABEL = "JWT One-Time Password Binder";
     public final static String JWT_KEY = "token";
     public final static String PASSWORD_KEY = "otp";
@@ -54,12 +55,6 @@ public class JwtBasedOneTimePasswordLoadBinder extends FormBinder implements For
         return AppUtil.readPluginResource(getClass().getName(), "/properties/OneTimaPasswordLoadBinder.json", args, true, "/messages/OneTimePassword");
     }
 
-
-    protected String generateRandomPassword(int digits) {
-        Random rand = new Random();
-        return String.format("%0" + digits + "d", rand.nextInt((int) Math.pow(10, digits)));
-    }
-
     @Override
     public FormRowSet load(Element element, String primaryKey, FormData formData) {
         final String fieldId = element.getPropertyString(FormUtil.PROPERTY_ID);
@@ -69,7 +64,11 @@ public class JwtBasedOneTimePasswordLoadBinder extends FormBinder implements For
         }
 
         final int digits = getDigits();
-        final String password = generateRandomPassword(digits);
+        final boolean numeric = hasNumeric();
+        final boolean upperCase =hasUpperCase();
+        final boolean lowerCase = hasLowerCase();
+        final boolean specialChars = hasSpecialCharacters();
+        final String password = generateRandomPassword(digits, numeric, upperCase, lowerCase, specialChars);
 
         AuthTokenService authTokenService = (AuthTokenService) AppUtil.getApplicationContext().getBean("authTokenService");
 
@@ -108,6 +107,26 @@ public class JwtBasedOneTimePasswordLoadBinder extends FormBinder implements For
      * @return (in minutes)
      */
     protected int getExpiryTime() {
-        return 1;
+        try {
+            return Integer.parseInt(getPropertyString("expiryTime"));
+        } catch (NumberFormatException e) {
+            return 5;
+        }
+    }
+
+    protected boolean hasNumeric() {
+        return "true".equalsIgnoreCase(getPropertyString("numeric"));
+    }
+
+    protected boolean hasUpperCase() {
+        return "true".equalsIgnoreCase(getPropertyString("upper"));
+    }
+
+    protected boolean hasLowerCase() {
+        return "true".equalsIgnoreCase(getPropertyString("lower"));
+    }
+
+    protected boolean hasSpecialCharacters() {
+        return "true".equalsIgnoreCase(getPropertyString("special"));
     }
 }

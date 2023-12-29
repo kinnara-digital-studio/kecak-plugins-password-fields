@@ -230,7 +230,7 @@ public class AutoGeneratePasswordField extends PasswordField implements PluginWe
 
             // get current data
             final int digits = getTokenDigits(elementForLoading);
-            final String randomPassword = generateRandomPassword(digits, true, false, false, false, false);
+            final String randomPassword = generateRandomPassword(digits, true,  false, false, false);
 
             storePassword(formForLoading, primaryKey, fieldId, randomPassword);
 
@@ -288,11 +288,6 @@ public class AutoGeneratePasswordField extends PasswordField implements PluginWe
             LogUtil.warn(getClassName(), ex.getMessage());
             httpServletResponse.sendError(ex.getErrorCode(), ex.getMessage());
         }
-    }
-
-    private String generateRandomPassword(int digits, boolean numeric, boolean alpha, boolean upperCase, boolean lowerCase, boolean specialCharacter) {
-        Random rand = new Random();
-        return String.format("%0"+digits+"d", rand.nextInt((int) Math.pow(10, digits)));
     }
 
     private JSONObject getRequestBody(HttpServletRequest request) throws IOException, JSONException {

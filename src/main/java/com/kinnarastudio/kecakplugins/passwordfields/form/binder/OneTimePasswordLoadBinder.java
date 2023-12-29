@@ -53,12 +53,6 @@ public class OneTimePasswordLoadBinder extends FormBinder implements FormLoadBin
         return AppUtil.readPluginResource(getClass().getName(), "/properties/OneTimaPasswordLoadBinder.json", args, true, "/messages/OneTimePassword");
     }
 
-
-    protected String generateRandomPassword(int digits) {
-        Random rand = new Random();
-        return String.format("%0" + digits + "d", rand.nextInt((int) Math.pow(10, digits)));
-    }
-
     @Override
     public FormRowSet load(Element element, String primaryKey, FormData formData) {
         if(primaryKey == null) {
@@ -73,7 +67,7 @@ public class OneTimePasswordLoadBinder extends FormBinder implements FormLoadBin
         }
 
         final int digits = getDigits();
-        final String otpValue = generateRandomPassword(digits);
+        final String otpValue = generateRandomPassword(digits, true,  false, false, false);
         return storeToken(element, primaryKey, otpValue);
     }
 
