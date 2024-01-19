@@ -97,7 +97,7 @@ public class JwtBasedOneTimePasswordLoadBinder extends FormBinder implements For
                 .orElse(4);
     }
 
-    protected long getTokenDifferentiator() {
+    public long getTokenDifferentiator() {
         final Date now = new Date();
         return now.getTime();
     }

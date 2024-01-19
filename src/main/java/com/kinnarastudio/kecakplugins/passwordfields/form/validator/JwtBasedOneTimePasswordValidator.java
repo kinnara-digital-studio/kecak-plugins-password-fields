@@ -8,6 +8,7 @@ import org.joget.apps.form.model.FormData;
 import org.joget.apps.form.model.FormRow;
 import org.joget.apps.form.model.FormValidator;
 import org.joget.apps.form.service.FormUtil;
+import org.joget.commons.util.LogUtil;
 import org.joget.commons.util.ResourceBundleUtil;
 import org.joget.plugin.base.PluginManager;
 import org.kecak.apps.app.service.AuthTokenService;
@@ -41,7 +42,8 @@ public class JwtBasedOneTimePasswordValidator extends FormValidator {
         final String[] onetimePasswords = ((Map<String, String>)getRow(element, formData).getCustomProperties()).entrySet().stream()
                 .filter(e -> e.getKey().startsWith(JwtBasedOneTimePasswordLoadBinder.JWT_KEY + "-"))
                 .map(Map.Entry::getValue)
-                .map(Try.onFunction( token -> authTokenService.getClaimDataFromToken(token, JwtBasedOneTimePasswordLoadBinder.PASSWORD_KEY, String.class), (RuntimeException e) -> {
+                .peek(s -> LogUtil.info(getClassName(), "validate : token ["+s+"]"))
+                .map(Try.onFunction(token -> authTokenService.getClaimDataFromToken(token, JwtBasedOneTimePasswordLoadBinder.PASSWORD_KEY, String.class), (RuntimeException e) -> {
                     final String buttonLabel = element.getPropertyString("generateTokenButtonLabel");
                     final String errorMessage;
                     if(buttonLabel.isEmpty()) {
@@ -50,6 +52,8 @@ public class JwtBasedOneTimePasswordValidator extends FormValidator {
                         errorMessage = "Token expired. Please re-press button \"" + buttonLabel + "\"";
                     }
 
+                    LogUtil.error(getClassName(), e, e.getMessage());
+
                     formData.addFormError(elementId, errorMessage);
 
                     return null;
@@ -57,6 +61,11 @@ public class JwtBasedOneTimePasswordValidator extends FormValidator {
                 .filter(Objects::nonNull)
                 .toArray(String[]::new);
 
+        if(onetimePasswords.length == 0) {
+            formData.addFormError(elementId, "Token unavailable");
+        }
+
+        LogUtil.info(getClassName(), "onetimePasswords ["+String.join("||", onetimePasswords)+"]");
         return onetimePasswords.length > 0 && validateMandatory(formData, elementId, elementLabel, values, null) && validateToken(element, formData, onetimePasswords, values);
     }
 

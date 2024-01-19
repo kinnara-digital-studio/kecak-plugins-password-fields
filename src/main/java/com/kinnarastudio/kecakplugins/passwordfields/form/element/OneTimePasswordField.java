@@ -1,10 +1,14 @@
 package com.kinnarastudio.kecakplugins.passwordfields.form.element;
 
+import com.kinnarastudio.commons.Try;
+import com.kinnarastudio.commons.jsonstream.JSONStream;
 import com.kinnarastudio.kecakplugins.passwordfields.commons.RestApiException;
 import com.kinnarastudio.kecakplugins.passwordfields.commons.Utils;
+import com.kinnarastudio.kecakplugins.passwordfields.form.binder.JwtBasedOneTimePasswordLoadBinder;
 import com.kinnarastudio.kecakplugins.passwordfields.form.binder.OneTimePasswordLoadBinder;
 import com.kinnarastudio.kecakplugins.passwordfields.form.validator.OneTimePasswordValidator;
 import com.kinnarastudio.kecakplugins.passwordfields.hashvariable.OneTimePasswordHashVariable;
+import net.fortuna.ical4j.model.DateTime;
 import org.joget.apps.app.model.AppDefinition;
 import org.joget.apps.app.service.AppPluginUtil;
 import org.joget.apps.app.service.AppUtil;
@@ -18,6 +22,7 @@ import org.joget.plugin.base.PluginWebSupport;
 import org.joget.workflow.model.WorkflowAssignment;
 import org.joget.workflow.model.service.WorkflowUserManager;
 import org.joget.workflow.util.WorkflowUtil;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
@@ -34,6 +39,8 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.kinnarastudio.kecakplugins.passwordfields.form.binder.JwtBasedOneTimePasswordLoadBinder.JWT_KEY;
 
 /**
  * @author aristo
@@ -66,6 +73,7 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
         return super.formatData(formData);
     }
 
+
     @Override
     public String renderTemplate(FormData formData, Map dataModel) {
         String template = "OneTimePassword.ftl";
@@ -75,7 +83,7 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
     @Override
     public Object handleElementValueResponse(@Nonnull Element element, @Nonnull FormData formData) throws JSONException {
         AppDefinition appDefinition = AppUtil.getCurrentAppDefinition();
-        Form rootForm = FormUtil.findRootForm(this);
+        Form rootForm = FormUtil.findRootForm(element);
         String primaryKeyValue = formData.getPrimaryKeyValue();
 
         return SecurityUtil.generateNonce(nonceArgumentsGenerator(
@@ -84,6 +92,29 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
                         getPropertyString(FormUtil.PROPERTY_ID),
                         primaryKeyValue),
                 1);
+    }
+
+    @Override
+    public String[] handleJsonDataRequest(@Nullable Object value, @Nonnull Element element, @Nonnull FormData formData) throws JSONException {
+        final FormLoadBinder loadBinder = ((OneTimePasswordField)element).getGeneratorLoadBinder();
+        if (loadBinder instanceof JwtBasedOneTimePasswordLoadBinder && value instanceof JSONObject) {
+            try {
+                final JSONObject jsonValue = (JSONObject) value;
+                final String requestParameterName = FormUtil.getElementParameterName(element);
+                final JSONArray jsonTokens = jsonValue.getJSONArray("tokens");
+                final String[] tokens = JSONStream.of(jsonTokens, Try.onBiFunction(JSONArray::getString))
+                        .toArray(String[]::new);
+
+                formData.addRequestParameterValues(requestParameterName + "-" + JwtBasedOneTimePasswordLoadBinder.JWT_KEY + "-" + ((JwtBasedOneTimePasswordLoadBinder) loadBinder).getTokenDifferentiator(), tokens);
+
+                final String stringValue = jsonValue.getString("value");
+                return super.handleJsonDataRequest(stringValue, element, formData);
+            } catch (JSONException e) {
+                return super.handleJsonDataRequest(value, element, formData);
+            }
+
+        }
+        return super.handleJsonDataRequest(value, element, formData);
     }
 
     protected String renderTemplate(String template, FormData formData, @SuppressWarnings("rawtypes") Map dataModel) {
@@ -262,9 +293,11 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
                 }
             }
 
-            final Optional<FormLoadBinder> optLoadBinder = Optional.of(element)
-                    .map(e -> e.getProperty("generatorLoadBinder"))
-                    .map(prop -> (FormLoadBinder) pluginManager.getPlugin((Map<String, Object>) prop));
+            final Form formToExecute = generateForm(formId, formData);
+            final Element elementToExecute = FormUtil.findElement(fieldId, formToExecute, formData);
+            final Optional<FormLoadBinder> optLoadBinder = Optional.ofNullable(elementToExecute)
+                    .map(e -> ((OneTimePasswordField)e).getGeneratorLoadBinder());
+
             // generate and load token
             final FormRow row = optLoadBinder
                     .map(binder -> binder.load(element, primaryKey, formData))
@@ -297,8 +330,6 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
                 LogUtil.info(getClassName(), "Password generated [" + oneTimePassword + "]");
             }
 
-            final Form formToExecute = generateForm(formId, formData);
-            final Element elementToExecute = FormUtil.findElement(fieldId, formToExecute, formData);
             final Map<String, Object> notificationToolProperty = (Map<String, Object>) elementToExecute.getProperty("notificationTool");
             final DefaultApplicationPlugin notificationToolPlugin = pluginManager.getPlugin(notificationToolProperty);
             final OneTimePasswordHashVariable oneTimePasswordHashVariable = (OneTimePasswordHashVariable) pluginManager.getPlugin(OneTimePasswordHashVariable.class.getName());
@@ -392,5 +423,13 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
 
     protected boolean isDebug() {
         return "true".equalsIgnoreCase(getPropertyString("debug"));
+    }
+
+    protected FormLoadBinder getGeneratorLoadBinder() {
+        final ApplicationContext applicationContext = AppUtil.getApplicationContext();
+        final PluginManager pluginManager = (PluginManager) applicationContext.getBean("pluginManager");
+        return Optional.of(getProperty("generatorLoadBinder"))
+                .map(prop -> (FormLoadBinder) pluginManager.getPlugin((Map<String, Object>) prop))
+                .orElse(null);
     }
 }
