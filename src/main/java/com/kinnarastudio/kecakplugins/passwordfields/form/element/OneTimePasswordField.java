@@ -96,7 +96,7 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
 
     @Override
     public String[] handleJsonDataRequest(@Nullable Object value, @Nonnull Element element, @Nonnull FormData formData) throws JSONException {
-        final FormLoadBinder loadBinder = ((OneTimePasswordField)element).getGeneratorLoadBinder();
+        final FormLoadBinder loadBinder = ((OneTimePasswordField) element).getGeneratorLoadBinder();
         if (loadBinder instanceof JwtBasedOneTimePasswordLoadBinder && value instanceof JSONObject) {
             try {
                 final JSONObject jsonValue = (JSONObject) value;
@@ -296,7 +296,7 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
             final Form formToExecute = generateForm(formId, formData);
             final Element elementToExecute = FormUtil.findElement(fieldId, formToExecute, formData);
             final Optional<FormLoadBinder> optLoadBinder = Optional.ofNullable(elementToExecute)
-                    .map(e -> ((OneTimePasswordField)e).getGeneratorLoadBinder());
+                    .map(e -> ((OneTimePasswordField) e).getGeneratorLoadBinder());
 
             // generate and load token
             final FormRow row = optLoadBinder
@@ -330,14 +330,16 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
                 LogUtil.info(getClassName(), "Password generated [" + oneTimePassword + "]");
             }
 
-            final Map<String, Object> notificationToolProperty = (Map<String, Object>) elementToExecute.getProperty("notificationTool");
+            final OneTimePasswordHashVariable oneTimePasswordHashVariable = Optional.ofNullable((OneTimePasswordHashVariable) pluginManager.getPlugin(OneTimePasswordHashVariable.class.getName()))
+                    .orElseThrow(() -> new RestApiException(HttpServletResponse.SC_BAD_REQUEST, "Plugin ["+OneTimePasswordHashVariable.class.getName()+"] is not available"));
+
+            final String prefix = oneTimePasswordHashVariable.getPrefix();
+
+            final Map<String, Object> notificationToolProperty = (Map<String, Object>) deepReplaceOtp(elementToExecute.getProperty("notificationTool"), "(?<=[#{]{1}" + prefix + ")(?=[#}]{1})", "." + oneTimePassword, assignment);
             final DefaultApplicationPlugin notificationToolPlugin = pluginManager.getPlugin(notificationToolProperty);
-            final OneTimePasswordHashVariable oneTimePasswordHashVariable = (OneTimePasswordHashVariable) pluginManager.getPlugin(OneTimePasswordHashVariable.class.getName());
 
-            if (notificationToolPlugin != null && oneTimePasswordHashVariable != null) {
-                final String prefix = oneTimePasswordHashVariable.getPrefix();
-
-                final Map<String, Object> executionProperties = (Map<String, Object>) deepReplaceOtp(notificationToolProperty.get("properties"), "(?<=[#{]{1}" + prefix + ")(?=[#}]{1})", "." + oneTimePassword);
+            if (notificationToolPlugin != null) {
+                final Map<String, Object> executionProperties = (Map<String, Object>) notificationToolProperty.get("properties");
 
                 executionProperties.put("pluginManager", pluginManager);
                 executionProperties.put("appDef", appDefinition);
@@ -348,6 +350,11 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
 
                 if (assignment != null) {
                     executionProperties.put("workflowAssignment", assignment);
+                }
+
+                HttpServletRequest request = WorkflowUtil.getHttpServletRequest();
+                if (request != null) {
+                    executionProperties.put("request", request);
                 }
 
                 notificationToolPlugin.execute(executionProperties);
@@ -407,15 +414,16 @@ public class OneTimePasswordField extends Element implements FormBuilderPaletteE
         return "true".equalsIgnoreCase(getPropertyString("ignoreNonce"));
     }
 
-    protected Object deepReplaceOtp(Object value, String find, String replaceWith) {
+    protected Object deepReplaceOtp(Object value, String find, String replaceWith, WorkflowAssignment assignment) {
         if (value instanceof String) {
-            return value.toString().replaceAll(find, replaceWith);
+            String result = value.toString().replaceAll(find, replaceWith);
+            return AppUtil.processHashVariable(result, assignment, null, null);
         } else if (value instanceof Map) {
             return Optional.of((Map<String, Object>) value)
                     .map(Map::entrySet)
                     .map(Collection::stream)
                     .orElseGet(Stream::empty)
-                    .collect(Collectors.toMap(Map.Entry::getKey, e -> deepReplaceOtp(e.getValue(), find, replaceWith)));
+                    .collect(Collectors.toMap(Map.Entry::getKey, e -> deepReplaceOtp(e.getValue(), find, replaceWith, assignment)));
         } else {
             return value;
         }
